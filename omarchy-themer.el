@@ -1,4 +1,4 @@
-;;; omarchy-themer.el --- Theme management for Doom Emacs -*- lexical-binding: t; -*-
+;;; omarchy-themer.el --- Theme management for Omarchy Linux -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2025
 
@@ -70,7 +70,16 @@ removing -theme.el suffix (e.g., foo-theme.el -> foo)."
     (omarchy-themer-add-theme-directory)
     ;; Load the theme (automatically finds and loads the file)
     (load-theme theme-name t)
+    (vterm-update-workaround)
     (message "Loaded theme: %s" theme-name)))
+
+;; Force vterm buffer to update display after a short delay
+;; Force vterm buffer to update display after a short delay
+(defun vterm-update-workaround ()
+  (run-with-timer 0.1 nil 'vterm--window-adjust-process-window-size))
+
+(add-hook 'vterm-mode-hook 'my-vterm-resize-workaround)
+
 
 ;;;###autoload
 (defun omarchy-themer-version ()
