@@ -43,7 +43,7 @@ if [ ! -f "$new_emacs_file" ]; then
     create_dynamic_theme
 fi
 
-emacsclient -e "(omarchy-themer-install-and-load \"$new_emacs_file\")"
+emacsclient -e "(omarchy-emacs-themer-install-and-load \"$new_emacs_file\")"
 
 success "Emacs theme updated!"
 exit 0

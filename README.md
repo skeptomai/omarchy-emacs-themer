@@ -1,10 +1,10 @@
-# omarchy-themer
+# omarchy-emacs-themer
 
 An Emacs Lisp package that integrates Doom Emacs with Omarchy Linux's system-wide theme management.
 
 ## Overview
 
-`omarchy-themer` automatically synchronizes your Emacs theme with Omarchy Linux's dynamic theming system. When you change your system theme in Omarchy Linux, this package ensures that Doom Emacs updates to match, providing a consistent visual experience across your entire desktop environment.
+`omarchy-emacs-themer` automatically synchronizes your Emacs theme with Omarchy Linux's dynamic theming system. When you change your system theme in Omarchy Linux, this package ensures that Doom Emacs updates to match, providing a consistent visual experience across your entire desktop environment.
 
 ## Features
 
@@ -28,7 +28,7 @@ An Emacs Lisp package that integrates Doom Emacs with Omarchy Linux's system-wid
 2. Add to your Doom Emacs `packages.el`:
 
 ```elisp
-(package! omarchy-themer :recipe (:local-repo "/path/to/omarchy-themer"))
+(package! omarchy-emacs-themer :recipe (:local-repo "/path/to/omarchy-emacs-themer"))
 ```
 
 3. Install the hook script to integrate with Omarchy's theme system:
@@ -51,15 +51,15 @@ The package works automatically once installed. When Omarchy Linux changes theme
 
 You can also use these functions directly:
 
-- `omarchy-themer-install-and-load` - Install and load a theme file
-- `omarchy-themer-add-theme-directory` - Add the theme directory to Emacs' load path
-- `omarchy-themer-version` - Display package version
+- `omarchy-emacs-themer-install-and-load` - Install and load a theme file
+- `omarchy-emacs-themer-add-theme-directory` - Add the theme directory to Emacs' load path
+- `omarchy-emacs-themer-version` - Display package version
 
 ## How It Works
 
 1. Omarchy Linux triggers theme hooks when the system theme changes
 2. The `20-emacs.sh` script generates a new theme file with system colors
-3. The script calls `omarchy-themer-install-and-load` via `emacsclient`
+3. The script calls `omarchy-emacs-themer-install-and-load` via `emacsclient`
 4. The package copies the theme file and loads it into Emacs
 5. Your Emacs session updates to match your system theme
 
@@ -73,4 +73,4 @@ Christopher Brown <cb@skeptomai.com>
 
 ## Links
 
-- GitHub: https://github.com/skeptomai/omarchy-themer
+- GitHub: https://github.com/skeptomai/omarchy-emacs-themer
