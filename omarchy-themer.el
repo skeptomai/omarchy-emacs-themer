@@ -13,16 +13,30 @@
 ;;; Commentary:
 
 ;; omarchy-themer provides theme management utilities for Doom Emacs
-;; built on top of the autothemer package.
+;; that integrate with Omarchy Linux's system-wide theme management.
+;; Built on top of the autothemer package.
+;;
+;; This package enables bidirectional theme synchronization:
+;;
+;; - PUSH: System theme changes trigger updates to running Emacs instances
+;;   via the 20-emacs.sh hook script that calls omarchy-themer-install-and-load
+;;
+;; - PULL: Emacs startup checks current system theme via
+;;   omarchy-themer-sync-on-startup to ensure initial state matches the system
 ;;
 ;; Usage:
 ;;
-;;   (require 'omarchy-themer)
+;;   (use-package! omarchy-themer
+;;     :config
+;;     (omarchy-themer-add-theme-directory)
+;;     (omarchy-themer-sync-on-startup))
 ;;
 
 ;;; Code:
 
 (require 'autothemer)
+
+;;; Customization
 
 (defgroup omarchy-themer nil
   "Theme management for Doom Emacs."
@@ -34,6 +48,8 @@
   "Directory where omarchy-themer looks for theme files."
   :type 'directory
   :group 'omarchy-themer)
+
+;;; Public Functions
 
 ;;;###autoload
 (defun omarchy-themer-add-theme-directory ()
@@ -71,6 +87,18 @@ removing -theme.el suffix (e.g., foo-theme.el -> foo)."
     ;; Load the theme (automatically finds and loads the file)
     (load-theme theme-name t)
     (message "Loaded theme: %s" theme-name)))
+
+;;;###autoload
+(defun omarchy-themer-sync-on-startup ()
+  "Load current Omarchy theme when Emacs starts.
+Checks for theme file at ~/.config/omarchy/current/theme/omarchy-doom-theme.el
+and loads it if present. This ensures Emacs starts with the current system theme
+even if the theme changed while Emacs was not running."
+  (interactive)
+  (let ((current-theme (expand-file-name
+                        "~/.config/omarchy/current/theme/omarchy-doom-theme.el")))
+    (when (file-exists-p current-theme)
+      (omarchy-themer-install-and-load current-theme))))
 
 ;;;###autoload
 (defun omarchy-themer-version ()

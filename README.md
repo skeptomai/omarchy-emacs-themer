@@ -75,7 +75,10 @@ Add to `~/.doom.d/config.el`:
         (expand-file-name "themes/" doom-user-dir))
 
   ;; Ensure theme directory is in load path on startup
-  (omarchy-themer-add-theme-directory))
+  (omarchy-themer-add-theme-directory)
+
+  ;; Sync with current system theme on startup
+  (omarchy-themer-sync-on-startup))
 ```
 
 Then sync:
@@ -99,6 +102,7 @@ Add to your `init.el`:
 
 (require 'omarchy-themer)
 (omarchy-themer-add-theme-directory)
+(omarchy-themer-sync-on-startup)
 ```
 
 ---
@@ -112,7 +116,8 @@ Add to your `init.el`:
   :quelpa (omarchy-themer :fetcher github
                           :repo "skeptomai/omarchy-emacs-themer")
   :config
-  (omarchy-themer-add-theme-directory))
+  (omarchy-themer-add-theme-directory)
+  (omarchy-themer-sync-on-startup))
 ```
 
 ---
@@ -138,6 +143,7 @@ cd ~/.emacs.d/site-lisp/omarchy-emacs-themer
 (add-to-list 'load-path "~/.emacs.d/site-lisp/omarchy-emacs-themer")
 (require 'omarchy-themer)
 (omarchy-themer-add-theme-directory)
+(omarchy-themer-sync-on-startup)
 ```
 
 ## Usage
@@ -182,6 +188,20 @@ Manually add the theme directory to Emacs' theme search path.
 M-x omarchy-themer-add-theme-directory RET
 ```
 
+#### `omarchy-themer-sync-on-startup`
+Sync Emacs with the current system theme. Loads the theme file at `~/.config/omarchy/current/theme/omarchy-doom-theme.el`.
+
+This should be called in your config to ensure Emacs starts with the current system theme, even if the theme changed while Emacs was not running.
+
+```elisp
+M-x omarchy-themer-sync-on-startup RET
+```
+
+Or in your config:
+```elisp
+(omarchy-themer-sync-on-startup)
+```
+
 #### `omarchy-themer-version`
 Display the current package version.
 
@@ -215,11 +235,18 @@ If you want to customize the theme after it loads, you can use Emacs' built-in `
 
 ## How It Works
 
+### During Theme Changes (Push)
 1. Omarchy Linux triggers theme hooks when the system theme changes
 2. The `20-emacs.sh` script generates a new theme file with system colors
 3. The script calls `omarchy-themer-install-and-load` via `emacsclient`
 4. The package copies the theme file and loads it into Emacs
 5. Your Emacs session updates to match your system theme
+
+### On Emacs Startup (Pull)
+1. `omarchy-themer-sync-on-startup` runs during Emacs initialization
+2. It checks for the current theme at `~/.config/omarchy/current/theme/omarchy-doom-theme.el`
+3. If found, it loads the theme ensuring Emacs starts with the current system theme
+4. This prevents Emacs from using stale theme data from previous sessions
 
 ## Troubleshooting
 
