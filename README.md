@@ -21,6 +21,19 @@ An Emacs Lisp package that integrates Doom Emacs with Omarchy Linux's system-wid
 - Doom Emacs
 - autothemer package (version 0.2.2+)
 - Omarchy Linux theme system
+- **[omarchy-theme-hook](https://github.com/imbypass/omarchy-theme-hook)** - Required for the hook system that triggers theme updates
+
+#### Installing omarchy-theme-hook
+
+This package requires `omarchy-theme-hook` to be installed first. It provides the hook infrastructure (`~/.config/omarchy/hooks/theme-set.d/`) that triggers theme updates when your system theme changes.
+
+Install it with:
+
+```bash
+curl -fsSL https://imbypass.github.io/omarchy-theme-hook/install.sh | bash
+```
+
+You can manage which applications receive theme updates using `thctl` (Theme Hook Controller) that comes with omarchy-theme-hook.
 
 ### Quick Install
 
@@ -235,8 +248,10 @@ If you want to customize the theme after it loads, you can use Emacs' built-in `
 
 ## How It Works
 
+This package integrates with [omarchy-theme-hook](https://github.com/imbypass/omarchy-theme-hook), which provides the hook infrastructure for extending Omarchy themes to various applications.
+
 ### During Theme Changes (Push)
-1. Omarchy Linux triggers theme hooks when the system theme changes
+1. Omarchy Linux triggers theme hooks when the system theme changes (via omarchy-theme-hook)
 2. The `20-emacs.sh` script generates a new theme file with system colors
 3. The script calls `omarchy-themer-install-and-load` via `emacsclient`
 4. The package copies the theme file and loads it into Emacs
@@ -251,6 +266,18 @@ If you want to customize the theme after it loads, you can use Emacs' built-in `
 ## Troubleshooting
 
 ### Theme doesn't update automatically
+
+**Verify omarchy-theme-hook is installed:**
+
+This package requires [omarchy-theme-hook](https://github.com/imbypass/omarchy-theme-hook) for the hook system. Check if it's installed:
+```bash
+ls ~/.config/omarchy/hooks/theme-set.d/
+```
+
+If the directory doesn't exist, install omarchy-theme-hook first:
+```bash
+curl -fsSL https://imbypass.github.io/omarchy-theme-hook/install.sh | bash
+```
 
 **Check if Emacs server is running:**
 ```elisp
