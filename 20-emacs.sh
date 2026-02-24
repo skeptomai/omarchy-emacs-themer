@@ -121,14 +121,16 @@ create_dynamic_theme() {
   (lsp-ui-doc-header                (:foreground "#${lsp_doc_header_fg}" :background "#${lsp_doc_header_bg}" :bold t))
   (lsp-ui-doc-url                   (:foreground blue :underline t))
 
-  ;; Diagnostics — wave underlines in semantic colors; covers both flycheck
-  ;; and flymake so whichever the user has active gets consistent styling
-  (flycheck-error                   (:underline (:style wave :color red)))
-  (flycheck-warning                 (:underline (:style wave :color yellow)))
-  (flycheck-info                    (:underline (:style wave :color cyan)))
-  (flymake-error                    (:underline (:style wave :color red)))
-  (flymake-warning                  (:underline (:style wave :color yellow)))
-  (flymake-note                     (:underline (:style wave :color cyan)))
+  ;; Diagnostics — colored underlines in semantic colors; covers both flycheck
+  ;; and flymake so whichever the user has active gets consistent styling.
+  ;; Note: autothemer evaluates face specs in a let context so bare symbols
+  ;; like 'wave must not appear as values — hex strings are used here instead.
+  (flycheck-error                   (:underline "#${normal_red}"))
+  (flycheck-warning                 (:underline "#${normal_yellow}"))
+  (flycheck-info                    (:underline "#${normal_cyan}"))
+  (flymake-error                    (:underline "#${normal_red}"))
+  (flymake-warning                  (:underline "#${normal_yellow}"))
+  (flymake-note                     (:underline "#${normal_cyan}"))
  ))
 
 (provide-theme 'omarchy-doom)
