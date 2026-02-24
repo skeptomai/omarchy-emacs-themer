@@ -117,7 +117,7 @@ create_dynamic_theme() {
   (lsp-face-highlight-write         (:background sel-bg :underline t))
 
   ;; LSP UI doc popup — body and header computed from light/dark palette above
-  (lsp-ui-doc-background            (:background "#${lsp_doc_bg}"))
+  (lsp-ui-doc-background            (:foreground "#${lsp_doc_fg}" :background "#${lsp_doc_bg}"))
   (lsp-ui-doc-header                (:foreground "#${lsp_doc_header_fg}" :background "#${lsp_doc_header_bg}" :bold t))
   (lsp-ui-doc-url                   (:foreground blue :underline t))
 
@@ -221,6 +221,7 @@ if [ -f "$HOME/.config/omarchy/current/theme/light.mode" ]; then
     ml_inactive_bg="$primary_background"
     ml_inactive_fg="$bright_black"
     lsp_doc_bg="$selection_background"
+    lsp_doc_fg="$selection_foreground"
     lsp_doc_header_bg="$normal_blue"
     lsp_doc_header_fg="$primary_background"
 else
@@ -229,6 +230,7 @@ else
     ml_inactive_bg="$normal_black"
     ml_inactive_fg="$bright_black"
     lsp_doc_bg="$normal_black"
+    lsp_doc_fg="$primary_foreground"
     lsp_doc_header_bg="$bright_black"
     lsp_doc_header_fg="$primary_foreground"
 fi
