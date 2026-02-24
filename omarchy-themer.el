@@ -91,6 +91,19 @@ removing -theme.el suffix (e.g., foo-theme.el -> foo)."
     (mapc #'disable-theme custom-enabled-themes)
     ;; Load the theme (automatically finds and loads the file)
     (load-theme theme-name t)
+    ;; lsp-ui-doc renders its popup in a persistent child frame whose default
+    ;; face is set programmatically at frame creation time.  load-theme does
+    ;; not update child frames, so the popup retains stale colors after a
+    ;; theme switch.  Re-apply the new lsp-ui-doc-background face values
+    ;; directly to the child frame's default face if one is live.
+    (when (and (featurep 'lsp-ui-doc)
+               (boundp 'lsp-ui-doc--frame)
+               (framep lsp-ui-doc--frame)
+               (frame-live-p lsp-ui-doc--frame))
+      (let ((bg (face-background 'lsp-ui-doc-background nil t))
+            (fg (face-foreground 'lsp-ui-doc-background nil t)))
+        (when bg (set-face-background 'default bg lsp-ui-doc--frame))
+        (when fg (set-face-foreground 'default fg lsp-ui-doc--frame))))
     (message "Loaded theme: %s" theme-name)))
 
 ;;;###autoload
