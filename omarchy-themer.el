@@ -84,6 +84,11 @@ removing -theme.el suffix (e.g., foo-theme.el -> foo)."
     (message "Copied %s to %s" filename theme-dir)
     ;; Ensure theme directory is in load path
     (omarchy-themer-add-theme-directory)
+    ;; Disable all active themes first so their face definitions don't bleed
+    ;; into the new theme.  Without this, load-theme stacks on top of the
+    ;; previous theme and any faces we don't explicitly define (e.g. Doom's
+    ;; internal echo-area / minibuffer faces) retain the old theme's values.
+    (mapc #'disable-theme custom-enabled-themes)
     ;; Load the theme (automatically finds and loads the file)
     (load-theme theme-name t)
     (message "Loaded theme: %s" theme-name)))
