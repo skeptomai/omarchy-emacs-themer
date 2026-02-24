@@ -85,7 +85,7 @@ create_dynamic_theme() {
   ;; Mode line — colors computed from light/dark palette above
   (mode-line                        (:foreground "#${ml_active_fg}" :background "#${ml_active_bg}"))
   (mode-line-inactive               (:foreground "#${ml_inactive_fg}" :background "#${ml_inactive_bg}"))
-  (mode-line-emphasis               (:foreground blue :bold t))
+  (mode-line-emphasis               (:foreground "#${ml_emphasis_fg}" :bold t))
   (mode-line-buffer-id              (:foreground "#${ml_active_fg}" :bold t))
 
   ;; Errors / warnings
@@ -220,6 +220,11 @@ if [ -f "$HOME/.config/omarchy/current/theme/light.mode" ]; then
     ml_active_fg="$selection_foreground"
     ml_inactive_bg="$primary_background"
     ml_inactive_fg="$bright_black"
+    # On light themes the mode-line background is sel-bg (the accent color).
+    # sel-bg and color4 (blue) are almost always the same accent, so using blue
+    # for emphasis would be invisible.  Use sel-fg instead — it is designed to
+    # contrast against sel-bg by the theme author.
+    ml_emphasis_fg="$selection_foreground"
     lsp_doc_bg="$selection_background"
     lsp_doc_fg="$selection_foreground"
     lsp_doc_header_bg="$normal_blue"
@@ -229,6 +234,9 @@ else
     ml_active_fg="$primary_foreground"
     ml_inactive_bg="$normal_black"
     ml_inactive_fg="$bright_black"
+    # On dark themes the mode-line background is color0 (black panel).
+    # A bright accent (blue) on black is readable and looks like emphasis.
+    ml_emphasis_fg="$normal_blue"
     lsp_doc_bg="$normal_black"
     lsp_doc_fg="$primary_foreground"
     lsp_doc_header_bg="$bright_black"

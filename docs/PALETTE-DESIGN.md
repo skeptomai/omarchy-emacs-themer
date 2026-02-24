@@ -33,6 +33,7 @@ face mappings for UI elements that need to adapt to a light background:
 | Active mode-line text | `fg` | `sel-fg` |
 | Inactive mode-line background | `black` (`color0`) | `bg` |
 | Inactive mode-line text | `br-black` (`color8`) | `br-black` (`color8`) |
+| Mode-line emphasis text | `blue` (`color4`) | `sel-fg` |
 | LSP popup background | `black` (`color0`) | `sel-bg` |
 | LSP popup text | `fg` | `sel-fg` |
 
