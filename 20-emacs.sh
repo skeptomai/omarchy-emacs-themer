@@ -109,6 +109,26 @@ create_dynamic_theme() {
   ;; Fringe and UI
   (fringe                           (:foreground br-black :background bg))
   (vertical-border                  (:foreground black))
+
+  ;; LSP symbol highlights — use the theme's selection color so all three
+  ;; levels feel native. Write highlights get an underline to distinguish them.
+  (lsp-face-highlight-textual       (:background sel-bg))
+  (lsp-face-highlight-read          (:background sel-bg))
+  (lsp-face-highlight-write         (:background sel-bg :underline t))
+
+  ;; LSP UI doc popup — body and header computed from light/dark palette above
+  (lsp-ui-doc-background            (:background "#${lsp_doc_bg}"))
+  (lsp-ui-doc-header                (:foreground "#${lsp_doc_header_fg}" :background "#${lsp_doc_header_bg}" :bold t))
+  (lsp-ui-doc-url                   (:foreground blue :underline t))
+
+  ;; Diagnostics — wave underlines in semantic colors; covers both flycheck
+  ;; and flymake so whichever the user has active gets consistent styling
+  (flycheck-error                   (:underline (:style wave :color red)))
+  (flycheck-warning                 (:underline (:style wave :color yellow)))
+  (flycheck-info                    (:underline (:style wave :color cyan)))
+  (flymake-error                    (:underline (:style wave :color red)))
+  (flymake-warning                  (:underline (:style wave :color yellow)))
+  (flymake-note                     (:underline (:style wave :color cyan)))
  ))
 
 (provide-theme 'omarchy-doom)
@@ -176,20 +196,35 @@ if [ -z "$primary_background" ]; then
     exit 0
 fi
 
-# Choose mode-line colors based on light vs dark theme. Light themes use the
-# selection palette (sel-bg/sel-fg) for the active bar so it stands out from
-# the near-white editor background, and bg/br-black for inactive so it recedes
-# naturally. Dark themes keep the existing black-panel approach.
+# Choose light/dark-sensitive face colors. The light.mode file is the theme
+# author's signal that the palette has a light background.
+#
+# Mode-line: light themes use sel-bg/sel-fg for the active bar (stands out
+# from the near-white editor bg) and bg/br-black for inactive (recedes
+# naturally). Dark themes use the black panel approach.
+#
+# LSP doc popup: light themes use sel-bg for the body (a tinted panel distinct
+# from the editor bg) and blue/bg for the header. Dark themes use the black
+# panel with br-black header.
+#
+# LSP symbol highlights use sel-bg/sel-fg on both light and dark — it's the
+# theme's own intended highlight color.
 if [ -f "$HOME/.config/omarchy/current/theme/light.mode" ]; then
     ml_active_bg="$selection_background"
     ml_active_fg="$selection_foreground"
     ml_inactive_bg="$primary_background"
     ml_inactive_fg="$bright_black"
+    lsp_doc_bg="$selection_background"
+    lsp_doc_header_bg="$normal_blue"
+    lsp_doc_header_fg="$primary_background"
 else
     ml_active_bg="$normal_black"
     ml_active_fg="$primary_foreground"
     ml_inactive_bg="$normal_black"
     ml_inactive_fg="$bright_black"
+    lsp_doc_bg="$normal_black"
+    lsp_doc_header_bg="$bright_black"
+    lsp_doc_header_fg="$primary_foreground"
 fi
 
 # The theme directory may not exist for newly-installed themes; create it first.
