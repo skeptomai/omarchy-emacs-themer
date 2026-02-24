@@ -2,81 +2,67 @@
 
 ## Overview
 
-This repository uses a **prescriptive theming system** for Emacs, similar to how `neovim.lua` works for Neovim. Each theme can define explicit colors for Emacs faces rather than relying on ANSI color mappings.
+`20-emacs.sh` dynamically generates an Emacs theme file from the current system
+palette every time the Omarchy theme changes. There is no per-theme `emacs.el`
+to maintain; the color mapping is handled entirely by the hook script.
 
 ## How It Works
-
-### Theme Structure
-
-Each theme directory contains:
-```
-stone-creature/
-├── colors.toml          # Base palette for terminals
-├── neovim.lua           # Neovim-specific colors
-├── emacs.el             # Emacs-specific colors (NEW)
-├── ghostty.conf         # Terminal configs
-└── backgrounds/
-```
 
 ### The Flow
 
 ```
-Option 1 (Prescriptive - Preferred):
-emacs.el → 20-emacs.sh copies → omarchy-doom-theme.el → Emacs
-
-Option 2 (Fallback):
-colors.toml → theme-set extracts ANSI → 20-emacs.sh generates → Emacs
+colors.toml  ─┐
+               ├─→ 20-emacs.sh generates omarchy-doom-theme.el → Emacs
+alacritty.toml ┘   (color extraction + light/dark detection)
 ```
 
-## emacs.el File Format
+1. When the system theme changes, `omarchy-theme-set` calls scripts in
+   `~/.config/omarchy/hooks/theme-set.d/`, exporting palette variables from
+   `colors.toml` before `20-emacs.sh` runs.
+2. If the theme has no `colors.toml` (e.g. `ayu-light`), the script falls back
+   to parsing `alacritty.toml` directly using `awk`.
+3. The script detects light themes via a `light.mode` file in the current theme
+   directory and selects appropriate UI colors (mode-line, LSP popup) for each
+   variant.
+4. A complete `omarchy-doom-theme.el` is written to
+   `~/.config/omarchy/current/theme/` and loaded into Emacs via `emacsclient`.
 
-The `emacs.el` file uses the `autothemer-deftheme` format, matching the structure of the generated themes:
+### Color Source Fallback Chain
 
-```elisp
-(autothemer-deftheme
- omarchy-doom "Theme description"
- ((((class color) (min-colors #xFFFFFF)))
-
-   ;; Color palette
-   (bg          "#hexcolor")
-   (fg          "#hexcolor")
-   (red         "#hexcolor")
-   ;; ... more colors
-   )
-
- ;; Face mappings
- (
-  (default (:foreground fg :background bg))
-  (font-lock-type-face (:foreground yellow))
-  ;; ... more faces
- ))
+```
+1. colors.toml  → exported by theme-set as $primary_background, $normal_red, etc.
+2. alacritty.toml → parsed by awk if $primary_background is empty
+3. No color source → display-warning in Emacs, keep previous theme
 ```
 
-## Color Mapping (neovim.lua → emacs.el)
+## Light vs Dark Detection
 
-Colors defined in `neovim.lua` are mapped to Emacs faces in `emacs.el`:
+The presence of `~/.config/omarchy/current/theme/light.mode` switches the UI
+color assignments. Themes that ship a `light.mode` file use selection colors for
+active UI panels; dark themes use the `color0` (normal black) panel approach.
 
-| neovim.lua | Usage | Emacs Faces |
-|------------|-------|-------------|
-| `red` | Errors, variables | `error`, `font-lock-variable-name-face`, `diff-removed` |
-| `orange` | Constants, numbers | `font-lock-constant-face`, `font-lock-number-face` |
-| `yellow` | Types, warnings | `font-lock-type-face`, `warning` |
-| `green` | Strings, success | `font-lock-string-face`, `diff-added` |
-| `cyan` | Builtins, regex | `font-lock-builtin-face`, `font-lock-preprocessor-face` |
-| `blue` | Functions, keywords | `font-lock-function-name-face`, `minibuffer-prompt` |
-| `purple` | Keywords | `font-lock-keyword-face` |
-| `magenta` | Special | `link-visited`, `diff-changed` |
-| `comment` | Comments | `font-lock-comment-face`, `shadow` |
+See [PALETTE-DESIGN.md](PALETTE-DESIGN.md) for the full table of color slot
+assignments and what properties make a palette work well with this system.
 
-## Complete Face List
+## Generated Face List
 
-The `emacs.el` files define these faces (from `20-emacs.sh`):
+`20-emacs.sh` emits face definitions for the following groups.
 
-### Core Faces
+### Core
+
 - `default`, `cursor`, `region`, `highlight`, `shadow`
 - `minibuffer-prompt`, `link`, `link-visited`
 
+### Line Numbers
+
+- `line-number`, `line-number-current-line`
+
+### Search / Match
+
+- `isearch`, `lazy-highlight`, `match`
+
 ### Syntax Highlighting
+
 - `font-lock-keyword-face`
 - `font-lock-function-name-face`, `font-lock-function-call-face`
 - `font-lock-variable-name-face`, `font-lock-variable-use-face`
@@ -88,49 +74,64 @@ The `emacs.el` files define these faces (from `20-emacs.sh`):
 - `font-lock-negation-char-face`, `font-lock-warning-face`
 - `font-lock-regexp-grouping-construct`, `font-lock-regexp-grouping-backslash`
 
-### UI Elements
-- `line-number`, `line-number-current-line`
-- `isearch`, `lazy-highlight`, `match`
-- `mode-line`, `mode-line-inactive`, `mode-line-emphasis`, `mode-line-buffer-id`
-- `fringe`, `vertical-border`
-- `trailing-whitespace`
+### Status and Diff
 
-### Status & Diff
 - `error`, `warning`, `success`
 - `diff-added`, `diff-removed`, `diff-changed`, `diff-header`
 - `show-paren-match`, `show-paren-mismatch`
+- `trailing-whitespace`
 
-## Installation
+### UI Elements
 
-To use the new prescriptive system:
+- `mode-line`, `mode-line-inactive`, `mode-line-emphasis`, `mode-line-buffer-id`
+- `fringe`, `vertical-border`
 
-1. **Install the modified hook:**
-   ```bash
-   cp ~/Projects/omarchy-themes/20-emacs.sh ~/.config/omarchy/hooks/theme-set.d/20-emacs.sh
-   chmod +x ~/.config/omarchy/hooks/theme-set.d/20-emacs.sh
-   ```
+### LSP Symbol Highlights
 
-2. **Sync themes to deployed location:**
-   ```bash
-   cp -r ~/Projects/omarchy-themes/*/emacs.el ~/.local/share/omarchy/themes/
-   ```
+- `lsp-face-highlight-textual`, `lsp-face-highlight-read`
+- `lsp-face-highlight-write` (adds underline to distinguish from read)
 
-3. **Switch themes** using Omarchy theme manager - the hook will automatically use `emacs.el` if present
+### LSP UI Doc Popup
 
-## Benefits
+- `lsp-ui-doc-background` — body of the popup; colors propagated to child frame
+  by `omarchy-themer--apply-lsp-ui-doc-colors` via `lsp-ui-doc-frame-hook`
+- `lsp-ui-doc-header` — header bar
+- `lsp-ui-doc-url`
 
-- ✅ **Complete control** over Emacs colors
-- ✅ **Consistency** with Neovim theming approach
-- ✅ **Theme-specific** color semantics
-- ✅ **Fallback support** for themes without `emacs.el`
-- ✅ **Aligned** with neovim.lua color definitions
+### Diagnostic Underlines
 
-## Creating New Themes
+Defined via `custom-theme-set-faces` with quoted specs (outside
+`autothemer-deftheme`) so that the `:style wave` symbol is treated as a literal
+data symbol rather than a palette variable lookup:
 
-When creating a new theme:
+- `flycheck-error`, `flycheck-warning`, `flycheck-info`
+- `flymake-error`, `flymake-warning`, `flymake-note`
 
-1. Define colors in `neovim.lua` first
-2. Copy one of the existing `emacs.el` files as a template
-3. Update the color palette section with your theme's colors
-4. The face mappings can usually stay the same
-5. Test by switching themes
+## omarchy-themer.el Responsibilities
+
+The Emacs package handles two things beyond simply calling `load-theme`:
+
+1. **Previous theme cleanup** — `(mapc #'disable-theme custom-enabled-themes)`
+   runs before `load-theme` so old face definitions do not bleed into the new
+   theme. Without this, faces defined only by the previous theme (e.g. Doom
+   internal faces) retain stale colors.
+
+2. **LSP popup child frame** — `lsp-ui-doc` renders its popup in a child frame
+   that is created fresh on each invocation and destroyed on dismiss.
+   `load-theme` does not reach child frames, so `omarchy-themer.el` registers
+   `omarchy-themer--apply-lsp-ui-doc-colors` on `lsp-ui-doc-frame-hook` via
+   `with-eval-after-load`. This propagates the `lsp-ui-doc-background` face
+   colors to the child frame's `default` face each time the popup appears.
+
+## Palette Requirements
+
+Not all theme palettes produce good results with this dynamic mapping. Themes
+generated by hue-biased tools (e.g. the Aether theme builder) can produce
+cascading contrast failures because `sel-bg` and `fg` are tonally similar,
+leaving no usable background color for UI panels.
+
+See [PALETTE-DESIGN.md](PALETTE-DESIGN.md) for:
+- What tonal properties a palette needs
+- Why there is no generic algorithmic fix for biased palettes
+- The future per-theme `emacs-overrides.toml` escape hatch
+- Doom config workaround for affected themes today
