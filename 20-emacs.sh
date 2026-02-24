@@ -82,11 +82,11 @@ create_dynamic_theme() {
   (font-lock-regexp-grouping-construct (:foreground cyan))
   (font-lock-regexp-grouping-backslash (:foreground cyan))
 
-  ;; Mode line
-  (mode-line                        (:foreground fg :background black))
-  (mode-line-inactive               (:foreground br-black :background black))
+  ;; Mode line — colors computed from light/dark palette above
+  (mode-line                        (:foreground "#${ml_active_fg}" :background "#${ml_active_bg}"))
+  (mode-line-inactive               (:foreground "#${ml_inactive_fg}" :background "#${ml_inactive_bg}"))
   (mode-line-emphasis               (:foreground blue :bold t))
-  (mode-line-buffer-id              (:foreground fg :bold t))
+  (mode-line-buffer-id              (:foreground "#${ml_active_fg}" :bold t))
 
   ;; Errors / warnings
   (error                            (:foreground red))
@@ -174,6 +174,22 @@ fi
 if [ -z "$primary_background" ]; then
     emacsclient -e "(display-warning 'omarchy-themer \"Could not extract colors from alacritty.toml; Emacs theme not updated\" :warning)" 2>/dev/null
     exit 0
+fi
+
+# Choose mode-line colors based on light vs dark theme. Light themes use the
+# selection palette (sel-bg/sel-fg) for the active bar so it stands out from
+# the near-white editor background, and bg/br-black for inactive so it recedes
+# naturally. Dark themes keep the existing black-panel approach.
+if [ -f "$HOME/.config/omarchy/current/theme/light.mode" ]; then
+    ml_active_bg="$selection_background"
+    ml_active_fg="$selection_foreground"
+    ml_inactive_bg="$primary_background"
+    ml_inactive_fg="$bright_black"
+else
+    ml_active_bg="$normal_black"
+    ml_active_fg="$primary_foreground"
+    ml_inactive_bg="$normal_black"
+    ml_inactive_fg="$bright_black"
 fi
 
 # The theme directory may not exist for newly-installed themes; create it first.
