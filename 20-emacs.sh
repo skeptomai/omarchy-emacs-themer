@@ -121,17 +121,21 @@ create_dynamic_theme() {
   (lsp-ui-doc-header                (:foreground "#${lsp_doc_header_fg}" :background "#${lsp_doc_header_bg}" :bold t))
   (lsp-ui-doc-url                   (:foreground blue :underline t))
 
-  ;; Diagnostics — colored underlines in semantic colors; covers both flycheck
-  ;; and flymake so whichever the user has active gets consistent styling.
-  ;; Note: autothemer evaluates face specs in a let context so bare symbols
-  ;; like 'wave must not appear as values — hex strings are used here instead.
-  (flycheck-error                   (:underline "#${normal_red}"))
-  (flycheck-warning                 (:underline "#${normal_yellow}"))
-  (flycheck-info                    (:underline "#${normal_cyan}"))
-  (flymake-error                    (:underline "#${normal_red}"))
-  (flymake-warning                  (:underline "#${normal_yellow}"))
-  (flymake-note                     (:underline "#${normal_cyan}"))
  ))
+
+;; Diagnostic underlines are defined outside autothemer-deftheme because
+;; autothemer evaluates face specs in a let context where palette names are
+;; bound as variables.  The 'wave style symbol has no such binding and would
+;; throw "Symbol's value as variable is void: wave".  custom-theme-set-faces
+;; takes quoted face specs — pure data — so 'wave is a literal symbol and
+;; hex color strings expand naturally from the shell variables.
+(custom-theme-set-faces 'omarchy-doom
+  '(flycheck-error   ((t (:underline (:style wave :color "#${normal_red}")))))
+  '(flycheck-warning ((t (:underline (:style wave :color "#${normal_yellow}")))))
+  '(flycheck-info    ((t (:underline (:style wave :color "#${normal_cyan}")))))
+  '(flymake-error    ((t (:underline (:style wave :color "#${normal_red}")))))
+  '(flymake-warning  ((t (:underline (:style wave :color "#${normal_yellow}")))))
+  '(flymake-note     ((t (:underline (:style wave :color "#${normal_cyan}"))))))
 
 (provide-theme 'omarchy-doom)
 EOF
