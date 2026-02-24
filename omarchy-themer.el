@@ -91,20 +91,24 @@ removing -theme.el suffix (e.g., foo-theme.el -> foo)."
     (mapc #'disable-theme custom-enabled-themes)
     ;; Load the theme (automatically finds and loads the file)
     (load-theme theme-name t)
-    ;; lsp-ui-doc renders its popup in a persistent child frame whose default
-    ;; face is set programmatically at frame creation time.  load-theme does
-    ;; not update child frames, so the popup retains stale colors after a
-    ;; theme switch.  Re-apply the new lsp-ui-doc-background face values
-    ;; directly to the child frame's default face if one is live.
-    (when (and (featurep 'lsp-ui-doc)
-               (boundp 'lsp-ui-doc--frame)
-               (framep lsp-ui-doc--frame)
-               (frame-live-p lsp-ui-doc--frame))
-      (let ((bg (face-background 'lsp-ui-doc-background nil t))
-            (fg (face-foreground 'lsp-ui-doc-background nil t)))
-        (when bg (set-face-background 'default bg lsp-ui-doc--frame))
-        (when fg (set-face-foreground 'default fg lsp-ui-doc--frame))))
     (message "Loaded theme: %s" theme-name)))
+
+;;; lsp-ui-doc integration
+
+(defun omarchy-themer--apply-lsp-ui-doc-colors (frame &rest _)
+  "Apply lsp-ui-doc-background face colors to the child FRAME.
+lsp-ui-doc-frame-hook calls this every time the popup frame is
+created, which is the only reliable point at which the frame exists
+and accepts face attribute changes."
+  (let ((bg (face-background 'lsp-ui-doc-background nil t))
+        (fg (face-foreground 'lsp-ui-doc-background nil t)))
+    (when bg (set-face-background 'default bg frame))
+    (when fg (set-face-foreground 'default fg frame))))
+
+;; Wire up the hook when lsp-ui-doc is loaded.  Using with-eval-after-load
+;; means this is a no-op when lsp-ui is not installed.
+(with-eval-after-load 'lsp-ui-doc
+  (add-hook 'lsp-ui-doc-frame-hook #'omarchy-themer--apply-lsp-ui-doc-colors))
 
 ;;;###autoload
 (defun omarchy-themer-sync-on-startup ()
